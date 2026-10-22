@@ -1,0 +1,9 @@
+~~ comments float like otters ~~
+dive fib(pebble n) -> pebble {
+  if n < 2 { surface n; }
+  surface fib(n - 1) + fib(n - 2);
+}
+
+paddle i from 0 to 10 {
+  splash fib(i);
+}

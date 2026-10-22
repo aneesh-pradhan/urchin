@@ -1,0 +1,2 @@
+dive two(pebble a, pebble b) -> pebble { surface a; }
+splash two(1);
