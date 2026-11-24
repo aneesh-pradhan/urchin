@@ -8,9 +8,9 @@ The compiler is the project. One C++ program lexes the source, parses it, and ge
 
 ## LLVM
 
-Urchin builds with LLVM **18, 19, 20, 21, 22, and 23**. CMake stops, and prints the install commands, for any other version. CI builds, runs the test suite, and runs `examples/fib.urc` on each of those majors.
+Urchin builds with LLVM **18, 19, 20, 21, 22, and 23**. Those are the majors that were configured, built, and run through the test suite. CMake stops, and prints the install commands, for any other version. CI does the same build, runs the test suite, and runs `examples/fib.urc` on each of those majors.
 
-Two LLVM changes set the edges of that range. LLVM 21 stores a `llvm::Triple` on the module, so 18–20 pass the triple string instead. LLVM 23's `BasicBlock::getTerminator()` asserts when a block is still open; Urchin checks the last instruction, which is what `getTerminator()` did before that.
+Two APIs differ inside that range. LLVM 21 stores a `llvm::Triple` on the module, so 18–20 pass the triple string instead. LLVM 23's `BasicBlock::getTerminator()` asserts when a block is still open; Urchin checks the last instruction, which is what `getTerminator()` did before that.
 
 ## Build and run
 
