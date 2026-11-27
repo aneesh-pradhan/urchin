@@ -1,6 +1,7 @@
 #include "codegen.h"
 
 #include <llvm/ADT/SmallString.h>
+#include <llvm/Config/llvm-config.h>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/Program.h>
 #include <llvm/Support/raw_ostream.h>
@@ -79,7 +80,12 @@ int main(int argc, char **argv) {
     reportError(input, src, e);
     return 1;
   }
+  // LLVM 21 stores a parsed Triple. Earlier releases take the triple string.
+#if LLVM_VERSION_MAJOR >= 21
   mod->setTargetTriple(llvm::Triple(llvm::sys::getDefaultTargetTriple()));
+#else
+  mod->setTargetTriple(llvm::sys::getDefaultTargetTriple());
+#endif
 
   if (emitLLVM) {
     if (output == "-") {

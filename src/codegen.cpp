@@ -65,7 +65,7 @@ private:
     genStmts(d.body);
 
     // Falling off the end of a dive surfaces 0.
-    if (!b.GetInsertBlock()->getTerminator())
+    if (!isTerminated(b.GetInsertBlock()))
       b.CreateRet(ConstantInt::get(i64, 0));
     verify(*fn);
   }
@@ -108,8 +108,14 @@ private:
     throw CompileError(loc, "no otter has stashed anything called '" + name + "'");
   }
 
+  // LLVM 23's getTerminator() asserts if the block is unfinished. The old
+  // implementation only looked at the last instruction, which is still public.
+  static bool isTerminated(BasicBlock *bb) {
+    return !bb->empty() && bb->back().isTerminator();
+  }
+
   void branchTo(BasicBlock *bb) {
-    if (!b.GetInsertBlock()->getTerminator())
+    if (!isTerminated(b.GetInsertBlock()))
       b.CreateBr(bb);
   }
 

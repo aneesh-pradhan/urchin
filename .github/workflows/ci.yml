@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: LLVM ${{ matrix.llvm }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        llvm: [18, 19, 20, 21, 22, 23]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake wget ca-certificates lsb-release software-properties-common gnupg
+
+      - name: Install LLVM ${{ matrix.llvm }}
+        run: |
+          wget -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
+          chmod +x /tmp/llvm.sh
+          sudo /tmp/llvm.sh ${{ matrix.llvm }}
+          sudo apt-get install -y llvm-${{ matrix.llvm }}-dev
+          echo "/usr/lib/llvm-${{ matrix.llvm }}/bin" >> "$GITHUB_PATH"
+
+      - name: Configure
+        run: cmake -S . -B build -DLLVM_DIR="$(llvm-config --cmakedir)"
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Run example
+        run: |
+          ./build/urchin examples/fib.urc -o fib
+          ./fib > fib.actual
+          diff -u tests/fib.out fib.actual
+          ./build/urchin examples/fib.urc --emit-llvm -o fib.ll
+          test -s fib.ll
